@@ -105,6 +105,12 @@
 
                     scope.$watch('$coRouteParams.' + options.routeParam, function (newVal) {
                         var current = variables[mapping];
+                        
+                        // Edge case as we don't display route params that are empty
+                        if (current === '' && newVal === undefined) {
+                            return;
+                        }
+                        
                         // NOTE:: Only double equals as the variable might be a number
                         //   and route will be a string (of course 0 == '', fuck it)
                         if (newVal != current) {
