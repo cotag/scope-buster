@@ -31,7 +31,7 @@ scopeBuster.pub(otherScope, 'variable.name', {
 // Then in another scope you can:
 
 
-scopeBuster.pub(scope, 'local', 'name.of.scopeBuster.variable');
+scopeBuster.sub(scope, 'local', 'name.of.scopeBuster.variable');
 
 // Then you can watch for changes or bind to the variable
 // i.e.
@@ -42,4 +42,4 @@ scope.$watch('local', function (newVar) {
 
 ```
 
-It is up to you to ensure variables are either namespaced correctly in scopeBuster or that there are no clashes.
+It is up to you to ensure variables are namespaced correctly in scopeBuster so that there are no clashes.
