@@ -1,0 +1,16 @@
+{
+  "name": "scope-buster",
+  "version": "1.0.0",
+  "main": "scope-buster.js",
+  "description": "AngularJS tool that provides a publish / subscribe system for connecting variables on different scopes",
+  "dependencies": {
+    "angular": "1.x",
+    "angular-route": "1.x"
+  },
+  "keywords": [
+    "scope",
+    "share",
+    "variables",
+    "AngularJS"
+  ]
+}
