@@ -15,15 +15,6 @@
                 api = {},
 
                 updateListeners = function (newVal, options) {
-                    // Update the location
-                    if (options.routeParam) {
-                        if (newVal === '') {
-                            $location.search(options.routeParam, undefined);
-                        } else {
-                            $location.search(options.routeParam, newVal);
-                        }
-                    }
-
                     // update the mappings
                     angular.forEach(mappings[options.mapping], function (scope_id, vars) {
                         var index,
@@ -77,6 +68,15 @@
                             }
                         } else {
                             updateListeners(newVal, options);
+                        }
+                    }
+                    
+                    // Update the location
+                    if (options.routeParam) {
+                        if (newVal === '') {
+                            $location.search(options.routeParam, undefined);
+                        } else {
+                            $location.search(options.routeParam, newVal);
                         }
                     }
                 });
