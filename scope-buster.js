@@ -5,8 +5,7 @@
         factory('scopeBuster', [
             '$timeout',
             '$location',
-            '$routeParams',
-        function ($timeout, $location, $routeParams) {
+        function ($timeout, $location) {
             var scopes = {},        // scope.$id => scope
                 mappings = {},      // scope.$id => variable.name => [scope.var1, scope.var2]
                 variables = {},     // variable.name => value
@@ -41,9 +40,21 @@
             api.pub = function (scope, variable, options) {
                 options = options || {};
 
-                var mapping = options.mapping || variable;
+                var mapping = options.mapping || variable,
+                    search = $location.search()[options.routeParam];
+
+                // Check if param set and set the scope variable if so
+                if (options.routeParam && search !== undefined && scope[variable] === undefined) {
+                    variables[mapping] = scope[variable] = search;
+                    updateListeners(search, options);
+                }
 
                 scope.$watch(variable, function (newVal) {
+                    if (variables[mapping] === newVal) {
+                        // may have been set by route param
+                        return;
+                    }
+
                     // set the variable
                     variables[mapping] = newVal;
 
@@ -70,7 +81,7 @@
                             updateListeners(newVal, options);
                         }
                     }
-                    
+
                     // Update the location
                     if (options.routeParam) {
                         if (newVal === '') {
@@ -100,11 +111,9 @@
 
                 // Watch the routeParam for changes
                 if (options.routeParam) {
-                    // Attach to scope so we can watch for changes
-                    scope.$coRouteParams = $routeParams;
-
-                    scope.$watch('$coRouteParams.' + options.routeParam, function (newVal) {
-                        var current = variables[mapping];
+                    scope.$on('$routeUpdate', function () {
+                        var current = variables[mapping],
+                            newVal = $location.search()[options.routeParam];
                         
                         // Edge case as we don't display route params that are empty
                         if (current === '' && newVal === undefined) {
