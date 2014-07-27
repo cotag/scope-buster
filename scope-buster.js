@@ -15,7 +15,7 @@
 
                 updateListeners = function (newVal, options) {
                     // update the mappings
-                    angular.forEach(mappings[options.mapping], function (scope_id, vars) {
+                    angular.forEach(mappings[options.mapping], function (vars, scope_id) {
                         var index,
                             name;
 
