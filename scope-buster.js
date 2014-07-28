@@ -1,7 +1,7 @@
 (function (angular) {
     'use strict';
 
-    angular.module('ScopeBuster', ['ngRoute']).
+    angular.module('ScopeBuster', []).
         factory('scopeBuster', [
             '$timeout',
             '$location',
@@ -13,16 +13,15 @@
                 temp ={},           // storage for rate limited values (last known value)
                 api = {},
 
-                updateListeners = function (newVal, options) {
+                updateListeners = function (newVal, mapping) {
                     // update the mappings
-                    angular.forEach(mappings[options.mapping], function (vars, scope_id) {
+                    angular.forEach(mappings[mapping], function (vars, scope_id) {
                         var index,
                             name;
 
                         for (index = 0; index < vars.length; index += 1) {
                             name = vars[index];
 
-                            // TODO:: may need to apply here?
                             scopes[scope_id][name] = newVal;
                         }
                     });
@@ -46,7 +45,7 @@
                 // Check if param set and set the scope variable if so
                 if (options.routeParam && search !== undefined && scope[variable] === undefined) {
                     variables[mapping] = scope[variable] = search;
-                    updateListeners(search, options);
+                    updateListeners(search, mapping);
                 }
 
                 scope.$watch(variable, function (newVal) {
@@ -59,27 +58,25 @@
                     variables[mapping] = newVal;
 
                     // updates listening scopes
-                    if (mappings[mapping] !== undefined) {
-                        if (options.debounce) {
-                            if (timers[mapping] !== undefined) {
-                                $timeout.cancel(timers[mapping]);
-                            }
+                    if (options.debounce) {
+                        if (timers[mapping] !== undefined) {
+                            $timeout.cancel(timers[mapping]);
+                        }
+                        timers[mapping] = $timeout(function () {
+                            delete timers[mapping];
+                            updateListeners(newVal, mapping);
+                        }, options.debounce);
+                    } else if (options.ratelimit) {
+                        temp[mapping] = newVal;
+
+                        if (timers[mapping] === undefined) {
                             timers[mapping] = $timeout(function () {
                                 delete timers[mapping];
-                                updateListeners(newVal, options);
-                            }, options.debounce);
-                        } else if (options.ratelimit) {
-                            temp[mapping] = newVal;
-
-                            if (timers[mapping] === undefined) {
-                                timers[mapping] = $timeout(function () {
-                                    delete timers[mapping];
-                                    updateListeners(temp[mapping], options);
-                                }, options.ratelimit);
-                            }
-                        } else {
-                            updateListeners(newVal, options);
+                                updateListeners(temp[mapping], mapping);
+                            }, options.ratelimit);
                         }
+                    } else {
+                        updateListeners(newVal, mapping);
                     }
 
                     // Update the location
@@ -99,6 +96,7 @@
                         if (options.routeParam) {
                             $location.search(options.routeParam, undefined);
                         }
+                        updateListeners(undefined, mapping);
                     }
 
                     if (options.ratelimit || options.debounce) {
