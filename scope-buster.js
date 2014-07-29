@@ -22,6 +22,8 @@
                         for (index = 0; index < vars.length; index += 1) {
                             name = vars[index];
 
+                            // We need to apply the changes to the scope
+                            //applyUpdate(scopes[scope_id], name, newVal);
                             scopes[scope_id][name] = newVal;
                         }
                     });
@@ -135,6 +137,8 @@
                         }
                     });
                 }
+
+                return api;
             };
 
             api.sub = function (scope, destination, source) {
@@ -162,6 +166,18 @@
                 if (variables[source] !== undefined) {
                     scope[destination] = variables[source];
                 }
+
+                return api;
+            };
+
+            api.set = function (variable, value) {
+                variables[variable] = value;
+                updateListeners(value, variable);
+                return api;
+            };
+
+            api.get = function (variable) {
+                return variables[variable];
             };
 
             return api;
